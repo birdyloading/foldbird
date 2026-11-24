@@ -1,0 +1,16 @@
+{
+  "name": "简单建筑外壳 · 格式示例",
+  "units": "mm",
+  "panels": [
+    {"id":"floor","name":"底板","role":"base","points":[[40,40],[100,40],[100,85],[40,85]]},
+    {"id":"north","name":"后墙","role":"body","points":[[40,8],[100,8],[100,40],[40,40]],
+      "hinge":{"parent":"floor","edge":[[40,40],[100,40]],"angle":90}},
+    {"id":"east","name":"右墙","role":"body","points":[[100,40],[132,40],[132,85],[100,85]],
+      "hinge":{"parent":"floor","edge":[[100,40],[100,85]],"angle":90}},
+    {"id":"south","name":"前墙","role":"body","points":[[40,85],[100,85],[100,117],[40,117]],
+      "holes":[[[64,94],[76,94],[76,109],[64,109]]],
+      "hinge":{"parent":"floor","edge":[[100,85],[40,85]],"angle":90}},
+    {"id":"west","name":"左墙","role":"body","points":[[8,40],[40,40],[40,85],[8,85]],
+      "hinge":{"parent":"floor","edge":[[40,85],[40,40]],"angle":90}}
+  ]
+}

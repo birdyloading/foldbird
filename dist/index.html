@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foldbird · 刀版工作台</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 36 36" aria-hidden="true"><path d="M3 8 17 13 30 5 26 21 12 31 15 17ZM15 17 26 21M17 13 12 31" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    <b>Foldbird</b>
+  </div>
+  <span class="workspace-name">刀版工作台</span>
+  <div class="top-actions">
+    <button id="photo" class="quiet">导出 PNG</button>
+    <button id="export" class="primary">导出 SVG</button>
+  </div>
+</header>
+<main>
+  <div class="project-bar">
+    <div>
+      <div id="sourceType" class="eyebrow">参考图刀版</div>
+      <h1 id="label">六瓣旋扣盒</h1>
+      <p id="structureSummary"></p>
+    </div>
+    <button id="pick" aria-expanded="false" aria-controls="shelf">切换结构 <span class="chevron" aria-hidden="true"></span></button>
+  </div>
+  <div class="workspace">
+    <section id="shelf" class="shelf" aria-label="结构库" hidden>
+      <div class="shelf-head"><h2>结构库</h2><button id="closeShelf">关闭</button></div>
+      <div class="import-row">
+        <label class="button import-button">导入结构 JSON<input type="file" id="structureFile" accept=".json,application/json"></label>
+        <a href="./structure-example.json" download>下载格式示例</a>
+      </div>
+      <p id="importMessage" role="status"></p>
+      <nav id="cards" aria-label="选择结构"></nav>
+    </section>
+    <section class="viewer" aria-label="预览">
+      <div class="viewer-bar">
+        <div class="tabs" role="group" aria-label="查看模式">
+          <button data-mode="both">分屏</button><button data-mode="3D">3D 样机</button><button data-mode="2D">2D 刀版</button><button data-mode="ref">参考原图</button>
+        </div>
+        <div class="view-actions">
+          <label id="overlayLabel" hidden><input type="checkbox" id="overlay"> 叠加原图</label>
+          <button id="reset" title="复位视角与缩放">复位视角</button>
+        </div>
+      </div>
+      <div id="stage">
+        <div class="pane-label" id="leftLabel">刀版展开图</div>
+        <div class="pane-label" id="rightLabel">立体样机</div>
+        <canvas id="model" tabindex="0" aria-label="3D 样机，拖动或用方向键旋转，滚轮缩放"></canvas>
+        <div id="flat" aria-label="2D 刀版展开图"></div>
+        <img id="ref" alt="当前结构的原始参考图">
+        <div id="views" role="group" aria-label="预设视角">
+          <button data-view="iso">透视</button><button data-view="front">正面</button><button data-view="top">顶面</button>
+        </div>
+      </div>
+      <div id="foldbar">
+        <label for="folding">折叠进度</label>
+        <button id="play" aria-label="播放折叠">播放</button>
+        <button data-fold="0">展开</button>
+        <input id="folding" type="range" min="0" max="100" value="100">
+        <button data-fold="100">成型</button>
+        <output id="foldOut" for="folding">100%</output>
+      </div>
+      <footer class="viewer-footer">
+        <div id="legend"><span><i class="cut-key"></i>裁切</span><span><i class="fold-key"></i>折线</span></div>
+        <div class="hint" id="hint"></div>
+      </footer>
+    </section>
+    <aside class="inspector" aria-label="样机设置">
+      <div class="inspector-head">
+        <h2>样机设置</h2>
+        <div class="inspector-tabs" role="group" aria-label="参数类别">
+          <button data-area="design" aria-pressed="true">贴图</button>
+          <button data-area="form" aria-pressed="false">结构与灯光</button>
+        </div>
+      </div>
+      <p id="referenceNotice" hidden>原图可单独查看。结构描线仍待核对。</p>
+      <section data-group="design" class="settings-group">
+        <h3>包装设计稿</h3>
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" aria-label="添加包装设计稿">
+          <strong>选择或拖入图片</strong>
+          <small id="filename">PNG、JPG 或 WebP</small>
+        </label>
+        <div class="field">
+          <label for="fit">图片适配</label>
+          <select id="fit"><option value="cover">铺满</option><option value="contain">完整显示</option></select>
+        </div>
+        <div class="field scale">
+          <div class="row"><label for="opacity">贴图不透明度</label><output id="pct" for="opacity">100%</output></div>
+          <input type="range" id="opacity" min="0" max="100" value="100">
+        </div>
+        <div id="transforms" class="settings-section">
+          <div class="row"><h3>图稿位置</h3><button id="centerArt">恢复居中</button></div>
+          <div class="field scale">
+            <div class="row"><label for="size">缩放</label><output id="sizeOut" for="size">100%</output></div>
+            <input type="range" id="size" min="30" max="240" value="100">
+          </div>
+          <div class="field scale">
+            <div class="row"><label for="angle">旋转</label><output id="angleOut" for="angle">0°</output></div>
+            <input type="range" id="angle" min="-180" max="180" value="0">
+          </div>
+          <small>也可在 2D 刀版上直接拖动图稿。</small>
+        </div>
+        <div class="art-actions"><button id="demo">加载测试图</button><button id="remove" hidden>移除贴图</button></div>
+      </section>
+      <section data-group="form" class="settings-group" hidden>
+        <div id="structure" class="settings-section">
+          <h3>刀模比例</h3>
+          <div class="field scale">
+            <div class="row"><label for="base">底面宽度</label><output id="baseOut" for="base">100%</output></div>
+            <input type="range" id="base" min="80" max="125" value="100">
+          </div>
+          <div class="field scale">
+            <div class="row"><label for="height">侧壁高度</label><output id="heightOut" for="height">100%</output></div>
+            <input type="range" id="height" min="65" max="145" value="100">
+          </div>
+          <div class="field scale">
+            <div class="row"><label for="glue">糊口宽度</label><output id="glueOut" for="glue">100%</output></div>
+            <input type="range" id="glue" min="65" max="135" value="100">
+          </div>
+          <small>100% 对应参考图的描线比例。</small>
+          <button id="restoreDie">恢复原图比例</button>
+        </div>
+        <div id="bottleSettings" class="settings-section" hidden>
+          <h3>瓶贴尺寸</h3>
+          <div class="row"><label for="diameter">瓶身直径（mm）</label><input type="number" class="precise" id="diameter" min="24" max="95"></div>
+          <div class="row"><label for="labelHeight">标签高度（mm）</label><input type="number" class="precise" id="labelHeight" min="10"></div>
+          <output id="labelSize"></output>
+          <small>直筒环贴，接缝留空 2 mm。</small>
+        </div>
+        <div id="scaleSettings" class="settings-section" hidden>
+          <h3>刀模尺寸</h3>
+          <div class="field scale">
+            <div class="row"><label for="dieScale">等比缩放</label><output id="dieScaleOut" for="dieScale">100%</output></div>
+            <input type="range" id="dieScale" min="50" max="150" value="100">
+          </div>
+        </div>
+        <div class="settings-section lighting">
+          <h3>材质与灯光</h3>
+          <div class="field"><span>底色</span><div id="colors" role="group" aria-label="样机底色"></div></div>
+          <div class="field">
+            <label for="scene">灯光场景</label>
+            <select id="scene"><option value="0">柔光摄影棚</option><option value="1">暖调侧光</option><option value="2">冷调暗房</option></select>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+  <div id="status" role="status" class="status" hidden></div>
+</main>
+<script src="./geometry.js"></script>
+<script src="./vendor/three.min.js"></script>
+<script src="./stage.js"></script>
+<script src="./hinges.js"></script>
+<script src="./bottles.js"></script>
+<script src="./templates.js"></script>
+<script src="./editor.js"></script>
+<script src="./app.js"></script>
+<script src="./inspector.js"></script>
+</body>
+</html>
