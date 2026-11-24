@@ -15,6 +15,16 @@ function createStage(canvas) {
  const shadow=new T.Mesh(new T.PlaneGeometry(2.6,2.6),new T.MeshBasicMaterial({map:new T.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false,side:T.DoubleSide}));
  shadow.rotation.x=-Math.PI/2;scene.add(shadow);
  let current,materials=[],texture,lastImage;
+ const ray=new T.Raycaster();let down=null;
+ canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});
+ canvas.addEventListener('pointerup',e=>{
+  if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>4)return;
+  const r=canvas.getBoundingClientRect();
+  ray.setFromCamera(new T.Vector2((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2),camera);
+  const hit=ray.intersectObjects(group.children.filter(o=>o.isMesh),false)[0];
+  if(!hit)return;
+  selectedPanel=hit.object.material.userData.index;showSettings('form');refreshFlat();redraw();
+ });
  function meshModel(m){
   for(const item of [...group.children]){item.geometry.dispose();group.remove(item)}
   materials.forEach(x=>x.dispose());materials=[];
@@ -60,3 +70,4 @@ function createStage(canvas) {
   renderer.render(scene,camera);
  }
 }
+

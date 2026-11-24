@@ -199,6 +199,7 @@ function initEditor() {
     const rect = svgNode.getBoundingClientRect();
     const factor = Math.min(rect.width / box.width, rect.height / box.height);
     selectedPanel = +target.dataset.panel;
+    if (!art) showSettings('form');
     drag = {x:e.clientX, y:e.clientY, ox:offsetX, oy:offsetY, w:factor * box.width, h:factor * box.height};
     flat.setPointerCapture(e.pointerId);
     refreshFlatAndStage();
@@ -247,3 +248,4 @@ function refreshFlatAndStage() {
   refreshFlat();
   redraw();
 }
+

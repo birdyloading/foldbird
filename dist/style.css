@@ -153,3 +153,7 @@ small { display:block;color:var(--muted);font-size:.8125rem;margin:8px 0 0;line-
   #foldbar button { padding-inline:5px }
   .tabs button,.view-actions label,.view-actions button { font-size:.8125rem }
 }
+
+#cards button small{display:block;font-size:.75rem;font-weight:400;color:#516154}
+#cards button{flex-wrap:wrap}
+#modelsTab[aria-pressed=true],#refsTab[aria-pressed=true]{background:#284735;color:white}

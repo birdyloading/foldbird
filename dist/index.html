@@ -35,7 +35,7 @@
         <a href="./structure-example.json" download>下载格式示例</a>
       </div>
       <p id="importMessage" role="status"></p>
-      <nav id="cards" aria-label="选择结构"></nav>
+      <div class="shelf-head"><button id="modelsTab" aria-pressed="true">可操作模型</button><button id="refsTab" aria-pressed="false">参考图</button></div><nav id="cards" aria-label="选择结构"></nav>
     </section>
     <section class="viewer" aria-label="预览">
       <div class="viewer-bar">
@@ -133,7 +133,7 @@
           <output id="labelSize"></output>
           <small>直筒环贴，接缝留空 2 mm。</small>
         </div>
-        <div id="scaleSettings" class="settings-section" hidden>
+        <div id="partSettings" class="settings-section" hidden><label for="partValue" id="partLabel"></label><input id="partValue" type="range"><output id="partOut"></output></div><div id="scaleSettings" class="settings-section" hidden>
           <h3>刀模尺寸</h3>
           <div class="field scale">
             <div class="row"><label for="dieScale">等比缩放</label><output id="dieScaleOut" for="dieScale">100%</output></div>
@@ -159,8 +159,10 @@
 <script src="./hinges.js"></script>
 <script src="./bottles.js"></script>
 <script src="./templates.js"></script>
+<script src="./extended.js"></script>
 <script src="./editor.js"></script>
 <script src="./app.js"></script>
 <script src="./inspector.js"></script>
 </body>
 </html>
+

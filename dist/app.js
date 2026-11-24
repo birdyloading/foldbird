@@ -76,7 +76,7 @@ function svg(m, { overlay = false, artwork = '', hit = false, exporting = false 
   const k = Math.min(w, h) / 400;
   const path = (name, d, stroke, dash) => d ? '<path id="' + name + '" d="' + d + '" fill="none" stroke="' + stroke + '" stroke-width="' + k + '"' + (dash ? ' stroke-dasharray="' + (k * 4) + ' ' + (k * 3) + '"' : '') + '/>' : '';
   const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
-  const sizes = {6:[626,558],8:[557,626],14:[626,813]};
+  const sizes = {3:[735,936],5:[626,306],6:[626,558],8:[557,626],14:[626,813]};
   const size = sizes[m.id];
   const source = overlay && m.reference && size ? '<image href="' + m.reference + '" x="0" y="0" width="' + size[0] + '" height="' + size[1] + '" opacity=".58"/>' : '';
   const regions = m.panels || (m.bottle ? [{name:'瓶贴',path:m.cut}] : []);
@@ -113,7 +113,7 @@ function selectMode(view) {
   const split = view === 'both', three = split || view === '3D', flat = split || view === '2D';
   $('stage').className = 'mode-' + view;
   $('views').hidden = $('reset').hidden = !three;
-  $('overlayLabel').hidden = !flat || !m.reference;
+  $('overlayLabel').hidden = !flat || !m.reference || m.id===1;
   $('model').hidden = !three;
   $('flat').hidden = !flat;
   $('ref').hidden = view !== 'ref';
@@ -158,14 +158,15 @@ function activate(n) {
   selectedPanel = -1;
   $('overlay').checked = false;
   $('label').textContent = m.name;
-  $('sourceType').textContent = m.referenceOnly ? '参考图' : m.reference ? '参考图描线' : m.bottle ? '概念样机' : '导入结构';
+  $('sourceType').textContent = m.referenceOnly ? '参考图' : m.reference ? '参考图描线' : m.bottle || m.concept ? '概念样机' : '导入结构';
   $('structureSummary').textContent = m.summary || (m.referenceOnly ? '原始结构参考' : m.bottle ? '环绕瓶贴 · 可调尺寸' : m.faces.length + ' 个面 · 保留导入的折线和孔位');
   if (m.reference) $('ref').src = m.reference;
   else $('ref').removeAttribute('src');
   $('bottleSettings').hidden = !m.bottle;
   $('foldbar').hidden = !m.foldable;
   $('structure').hidden = n !== 6;
-  $('scaleSettings').hidden = n === 6 || !!m.bottle || !!m.referenceOnly;
+  $('scaleSettings').hidden = n === 6 || !!m.bottle || !!m.referenceOnly || !!m.traced || !!m.concept;
+  configurePart(m);
   $('dieScale').value = Math.round((m.exportScale || 1) * 100);
   $('dieScale').dispatchEvent(new Event('change'));
   $('folding').value = Math.round((m.progress ?? 1) * 100);
@@ -203,18 +204,24 @@ function addCard(n) {
     thumbs.push([preview, n]);
   }
   button.append(document.createTextNode(m.name));
+  const detail=document.createElement('small');
+  detail.textContent=m.referenceOnly?'查看原图':m.foldable?'折叠 · 贴图':m.bottle?'瓶径 · 环贴':n===1?'抽屉开合':n===5?'窗口 · 内托':n===3?'门窗 · 屋顶':'尺寸 · 贴图';
+  button.append(detail);
   button.value = n;
   button.onclick = () => activate(n);
   $('cards').append(button);
 }
-for (const [name, ids] of [
-  ['可折叠刀版', [6, 8, 14]],
-  ['瓶身与标签', [11, 12, 13]],
-  ['原始参考图', [0, 1, 2, 3, 4, 5, 7, 9, 10]]
-]) {
-  cardHeading(name);
-  ids.forEach(addCard);
+function libraryTab(refs=false){
+  $('cards').replaceChildren();thumbs.length=0;
+  $('modelsTab').setAttribute('aria-pressed',String(!refs));$('refsTab').setAttribute('aria-pressed',String(refs));
+  const groups=refs?[['原始参考图',catalog.filter(m=>m.referenceOnly).map(m=>m.id)]]:
+   [['折盒与建筑纸模',[6,8,14,5,3,1]],['瓶身与软包装',[15,16,17,11,12,13]],['导入结构',catalog.filter(m=>m.design&&m.id>17).map(m=>m.id)]];
+  for(const [name,ids] of groups){if(ids.length){cardHeading(name);ids.forEach(addCard)}}
+  $('pick').textContent='模型库 · '+catalog.filter(m=>!m.referenceOnly).length+' 款可用';
+  if(!$('shelf').hidden)drawThumbnails();
 }
+$('modelsTab').onclick=()=>libraryTab(false);$('refsTab').onclick=()=>libraryTab(true);
+libraryTab();
 catalog.forEach(m => { if (!m.referenceOnly) prepare(m); });
 
 palette.forEach((value, i) => {
@@ -314,3 +321,4 @@ new ResizeObserver(() => {
 
 initEditor();
 activate(id);
+
