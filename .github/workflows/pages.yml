@@ -1,3 +1,4 @@
+# Re-run Pages after enabling the repository's publishing source.
 name: Deploy Foldbird to GitHub Pages
 
 on:
